@@ -60,13 +60,14 @@ function App() {
     }
   }, [history, pendingUserMsg, pendingAI]);
 
-  // 聊天訊息串
+  // 只顯示 user query 與 AI 最終答案，不顯示 ReAct 推理過程
   const chatMessages = [
-    ...history.flatMap(item => [
+    ...history.map(item => [
       { id: item.id + '-q', role: 'user', content: item.query },
       { id: item.id + '-a', role: 'assistant', content: item.response || '' }
-    ]),
-    ...(pendingUserMsg ? [{ id: 'pending-user', role: 'user', content: pendingUserMsg }] : [])
+    ]).flat(),
+    // 只在尚未送出時顯示暫存 user 訊息
+    ...(pendingUserMsg && history.length === 0 ? [{ id: 'pending-user', role: 'user', content: pendingUserMsg }] : [])
   ];
 
   const MessageBubble = ({ message }: { message: any }) => {

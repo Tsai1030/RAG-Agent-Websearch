@@ -108,8 +108,13 @@ class ReactAgentService {
       const action = actionMatch ? actionMatch[1].toLowerCase() : null;
       const actionInput = inputMatch ? inputMatch[1].trim() : '';
 
-      // 記錄有意義的回覆（非 action 指令且內容長度大於 30）
-      if (reply.length > 30 && !/^Action:/.test(reply)) {
+      // 記錄有意義的回覆（非 Action/Action Input/Finish 指令且內容長度大於 15）
+      if (
+        reply.length > 15 &&
+        !/^Action:/i.test(reply) &&
+        !/^Action Input:/i.test(reply) &&
+        !/^Finish:/i.test(reply)
+      ) {
         lastUsefulReply = reply;
       }
 
@@ -131,6 +136,11 @@ class ReactAgentService {
           });
         }
         return finalText;
+      }
+
+      // 新增：只要 AI 回覆內容有明確答案就提前回傳
+      if ((/位於|地址|電話|專長|醫師|醫院|科別/.test(reply) && reply.length > 20)) {
+        return reply;
       }
 
       if (action === 'finish' || finishMatch) {
@@ -184,7 +194,10 @@ class ReactAgentService {
       messages.push({ role: 'assistant', content: reply });
       messages.push({ role: 'user', content: `Observation: ${observation}` });
     }
-    // 如果 8 回合都沒明確答案，才回傳預設訊息
+    // 如果 8 回合都沒明確答案，但有 lastUsefulReply，直接回傳
+    if (lastUsefulReply) {
+      return lastUsefulReply;
+    }
     return '無法在限制內完成診斷';
   }
 }
