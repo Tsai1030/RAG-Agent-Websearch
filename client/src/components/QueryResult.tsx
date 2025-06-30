@@ -44,7 +44,7 @@ const QueryResult: React.FC<QueryResultProps> = ({ result }) => {
           <h3 className="text-sm font-medium text-gray-700 mb-3">🤖 AI 回應：</h3>
           <div className="p-4 bg-medical-50 border border-medical-200 rounded-lg">
             <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
-              {result.response}
+              {result.response || ''}
             </p>
           </div>
         </div>
@@ -74,10 +74,10 @@ const QueryResult: React.FC<QueryResultProps> = ({ result }) => {
                       href={item.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="ml-2 p-1 text-gray-400 hover:text-medical-600 transition-colors"
-                      title="在新視窗開啟"
+                      className="ml-2 p-1 text-blue-600 underline hover:text-blue-800 transition-colors"
+                      title={item.link}
                     >
-                      <ExternalLink className="h-4 w-4" />
+                      點我查看
                     </a>
                   </div>
                 </div>

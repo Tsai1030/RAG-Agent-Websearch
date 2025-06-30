@@ -6,7 +6,7 @@ const router = express.Router();
 // 醫療資訊查詢端點
 router.post('/', async (req, res) => {
   try {
-    const { query } = req.body;
+    const { query, history } = req.body;
 
     // 驗證輸入
     if (!query || typeof query !== 'string' || query.trim().length === 0) {
@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
     console.log(`🔍 收到查詢: ${query}`);
 
     // 處理查詢
-    const result = await processMedicalQueryReact(query.trim());
+    const result = await processMedicalQueryReact(query.trim(), history || []);
 
     res.json({
       success: true,

@@ -5,35 +5,40 @@ import QueryResult from './components/QueryResult';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorMessage from './components/ErrorMessage';
 import { queryMedicalInfo } from './services/api';
-import { QueryResponse, QueryStatus } from './types';
+import { QueryResponse, QueryStatus, QueryHistory } from './types';
 
 function App() {
   const [status, setStatus] = useState<QueryStatus>('idle');
-  const [result, setResult] = useState<QueryResponse | null>(null);
+  const [history, setHistory] = useState<QueryHistory[]>([]);
   const [error, setError] = useState<string>('');
 
   const handleQuery = async (query: string) => {
     try {
       setStatus('loading');
       setError('');
-      setResult(null);
-
-      console.log('🔍 開始查詢:', query);
-      const response = await queryMedicalInfo(query);
-      
-      setResult(response);
+      // 查詢時傳送歷史
+      const response = await queryMedicalInfo(query, history);
+      // 新增到歷史
+      setHistory(prev => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          query,
+          response: response.response,
+          timestamp: response.timestamp,
+          status: 'success',
+        }
+      ]);
       setStatus('success');
-      console.log('✅ 查詢完成:', response);
     } catch (err: any) {
-      console.error('❌ 查詢錯誤:', err);
       setError(err.message || '查詢失敗，請稍後再試');
       setStatus('error');
     }
   };
 
   const handleRetry = () => {
-    if (result) {
-      handleQuery(result.query);
+    if (history.length > 0) {
+      handleQuery(history[history.length - 1].query);
     }
   };
 
@@ -93,8 +98,12 @@ function App() {
           )}
 
           {/* 查詢結果 */}
-          {status === 'success' && result && (
-            <QueryResult result={result} />
+          {history.length > 0 && (
+            <div className="space-y-8">
+              {history.map((item) => (
+                <QueryResult key={item.id} result={item} />
+              ))}
+            </div>
           )}
         </div>
       </main>

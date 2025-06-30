@@ -37,9 +37,9 @@ apiClient.interceptors.response.use(
 );
 
 // 醫療資訊查詢 API
-export const queryMedicalInfo = async (query: string): Promise<QueryResponse> => {
+export const queryMedicalInfo = async (query: string, history: any[]): Promise<QueryResponse> => {
   try {
-    const response = await apiClient.post<QueryResponse>('/query', { query });
+    const response = await apiClient.post<QueryResponse>('/query', { query, history });
     return response.data;
   } catch (error: any) {
     if (error.response?.data) {

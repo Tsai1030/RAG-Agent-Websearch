@@ -25,9 +25,16 @@ export type QueryStatus = 'idle' | 'loading' | 'success' | 'error';
 export interface QueryHistory {
   id: string;
   query: string;
-  response: string;
+  response?: string;
   timestamp: string;
   status: QueryStatus;
+  searchResults?: {
+    organic: SearchResult[];
+    totalResults: number;
+  };
+  // 多輪對話用
+  role?: 'user' | 'assistant';
+  content?: string;
 }
 
 // 錯誤回應型別
