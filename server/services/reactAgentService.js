@@ -91,6 +91,7 @@ class ReactAgentService {
     // 新增：記錄 web_search observation
     let webSearchObservations = [];
     let lastWebSearchInput = '';
+    let lastUsefulReply = '';
 
     for (let i = 0; i < 8; i++) {
       const completion = await this.openai.chat.completions.create({
@@ -106,6 +107,11 @@ class ReactAgentService {
       const inputMatch = reply.match(/Action Input\s*:\s*([\s\S]*)/i);
       const action = actionMatch ? actionMatch[1].toLowerCase() : null;
       const actionInput = inputMatch ? inputMatch[1].trim() : '';
+
+      // 記錄有意義的回覆（非 action 指令且內容長度大於 30）
+      if (reply.length > 30 && !/^Action:/.test(reply)) {
+        lastUsefulReply = reply;
+      }
 
       // 新增：只有在回覆同時包含網址且內容長度超過 50 字才提前回傳
       if (/https?:\/\//.test(reply) && reply.length > 50) {
@@ -136,6 +142,10 @@ class ReactAgentService {
           finalText = finishMatch[1].trim();
         } else {
           finalText = reply;
+        }
+        // 如果 finish 回合內容為空，自動補上上一回合有意義的答案
+        if ((!finalText || /^Action: finish$/i.test(reply)) && lastUsefulReply) {
+          finalText = lastUsefulReply;
         }
         // 自動補全 web_search observation
         if (webSearchObservations.length > 0) {
