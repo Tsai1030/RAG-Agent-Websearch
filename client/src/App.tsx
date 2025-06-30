@@ -17,6 +17,9 @@ function App() {
   const [pendingUserMsg, setPendingUserMsg] = useState<string | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // 統一最大寬度
+  const CHAT_WIDTH = 'max-w-[800px]';
+
   const handleQuery = async (query: string) => {
     setPendingUserMsg(query);
     setPendingAI(true);
@@ -70,7 +73,7 @@ function App() {
     const isUser = message.role === 'user';
     return (
       <div className={`group mb-6 flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-        <div className="w-full max-w-[600px]">
+        <div className={`w-full ${CHAT_WIDTH}`}>
           {/* User Label */}
           {isUser && (
             <div className="flex items-center gap-2 mb-2 justify-end">
@@ -119,7 +122,7 @@ function App() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-medical-50 to-blue-50">
+    <div className="min-h-screen bg-white">
       {/* 頁首 */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -150,8 +153,8 @@ function App() {
       {/* 主要內容 */}
       <main className="flex-1 flex flex-col bg-white">
         {/* Messages */}
-        <div ref={chatContainerRef} className="flex-1 overflow-y-auto flex flex-col items-center">
-          <div className="w-full max-w-[600px] px-2 py-6">
+        <div ref={chatContainerRef} className="flex-1 overflow-y-auto flex flex-col items-center pb-32">
+          <div className={`w-full ${CHAT_WIDTH} px-2 py-6`}>
             {chatMessages.map((msg) => (
               <MessageBubble key={msg.id} message={msg} />
             ))}
@@ -159,8 +162,8 @@ function App() {
           </div>
         </div>
         {/* Input Area */}
-        <div className="border-t border-gray-200 bg-white flex justify-center px-2 py-4">
-          <div className="w-full max-w-[600px]">
+        <div className="fixed bottom-0 left-0 w-full z-20 bg-white flex justify-center border-t border-gray-200 py-4">
+          <div className={`w-full ${CHAT_WIDTH}`}>
             <div className="relative">
               <textarea
                 value={pendingUserMsg || ''}
@@ -189,25 +192,12 @@ function App() {
               </button>
             </div>
             <div className="text-xs text-gray-500 text-center mt-2">
-              本系統僅供參考，請查驗重要醫療資訊。
+              本系統結合 Google 搜尋與 GPT-4o，提供即時醫療資訊查詢。<br />
+              回覆僅供參考，請勿作為正式醫療診斷依據。<br />
             </div>
           </div>
         </div>
       </main>
-
-      {/* 頁尾 */}
-      <footer className="bg-white border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-2">
-              © 2024 即時醫療資訊查詢系統
-            </p>
-            <p className="text-xs text-gray-500">
-              本系統僅供參考，不構成醫療建議。請以醫院官方資訊為準。
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
