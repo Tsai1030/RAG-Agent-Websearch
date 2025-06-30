@@ -34,7 +34,9 @@ const SYSTEM_PROMPT = `你是一個醫療 ReAct agent，可使用以下工具：
   `2. vector_rag：向量檢索醫師資料\n` +
   `3. web_search：Google 搜尋\n` +
   `4. finish：輸出最終診斷報告。\n` +
-  `請依序輸出 Thought、Action、Action Input，獲得 Observation 後再繼續，直到使用 finish。回覆語言為繁體中文。`;
+  `請依序輸出 Thought、Action、Action Input，獲得 Observation 後再繼續，直到使用 finish。回覆語言為繁體中文。\n` +
+  `當你已經有明確答案時，請務必使用 finish action 結束，不要重複回覆。\n` +
+  `在輸出 finish action 時，請直接給出最終答案，不要加上「抱歉」、「我將正確地完成這次對話」等多餘語句或開場白，只需輸出醫療資訊本身。`;
 
 // ReAct Agent 服務
 class ReactAgentService {
