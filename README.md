@@ -22,6 +22,19 @@
 - 動態網頁內容抓取
 - 智能錯誤處理與重試機制
 
+## 🌟 LangChain 版本介紹
+
+本專案自 **v4.0.0** 起，將 ReAct Agent 改寫為 [LangChain](https://github.com/langchain-ai/langchainjs) 架構，
+並新增 `server/services/langchainAgentService.js`。透過 LangChain 可以更方便地擴充工具與整合 LLM，
+原有 `doctorRagService`、`vectorRagService`、`web_search` 等功能都以 `DynamicTool` 形式提供給 Agent 使用。
+
+### 操作步驟概要
+1. 安裝依賴：`npm run install-all`（會自動安裝 LangChain 相關套件）
+2. 在 `server/.env` 填入 `OPENAI_API_KEY` 與 `SERPER_API_KEY`
+3. 若首次使用，請執行 `python test_vector_rag.py` 建立向量資料庫
+4. 啟動系統：`npm run dev`
+5. 透過 POST `/api/query` 即可觸發新的 LangChain Agent 流程
+
 ## 🚀 快速開始
 
 ### 1. 環境設定
@@ -53,9 +66,9 @@ python test_vector_rag.py
 npm run dev
 ```
 
-### 4. 使用 ReAct Agent
-在後端運行後，可透過 POST `/api/query` 並傳入 `query` 欄位啟動 ReAct 推理流程。
-系統會依序輸出 Thought、Action、Observation，最後回傳診斷報告。
+### 4. 使用 LangChain Agent
+後端啟動後，透過 POST `/api/query` 並傳入 `query` 欄位即可觸發 LangChain ReAct 流程，
+Agent 會自動呼叫 doctor_rag、vector_rag 或 web_search 工具，並在多回合後給出診斷結果。
 
 ### 5. 訪問系統
 - 前端: http://localhost:3000
@@ -109,7 +122,7 @@ npm run dev
 - `server/services/vectorRagService.js`: 向量 RAG 服務
 - `server/services/queryService.js`: 主要查詢處理服務
 - `server/services/scrapingBeeService.js`: 即時資訊服務
-- `server/services/reactAgentService.js`: ReAct 推理服務
+- `server/services/langchainAgentService.js`: LangChain ReAct 推理服務
 
 ### 資料庫
 - `doctors.json`: 醫師資料庫 (8 位心臟血管內科醫師)
@@ -138,7 +151,7 @@ npm run dev
 
 ## 🧠 ReAct Agent 模式
 
-新增 `server/services/reactAgentService.js`，使用 GPT 依循 **Thought → Action → Observation** 流程逐步推理。
+新增 `server/services/langchainAgentService.js`，使用 LangChain 依循 **Thought → Action → Observation** 流程逐步推理。
 
 可用工具：
 1. `doctor_rag` – 醫師資料庫檢索
@@ -232,6 +245,11 @@ GPT-4o 整合分析
 修改 `server/services/queryService.js` 中的 `createIntegratedPrompt` 方法
 
 ## 📝 更新日誌
+
+### v4.0.0 - LangChain 版
+- ✅ ReAct Agent 改寫為 LangChain (`langchainAgentService.js`)
+- ✅ API 路由切換為新的 Agent 實作
+- ✅ 新增 `langchain` 相關依賴
 
 ### v3.0.0 - 雙重 RAG 整合版
 - ✅ 新增向量 RAG 系統 (bge-m3)

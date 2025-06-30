@@ -1,5 +1,5 @@
 const express = require('express');
-const { processMedicalQueryReact } = require('../services/reactAgentService');
+const { processMedicalQueryLangChain } = require('../services/langchainAgentService');
 
 const router = express.Router();
 
@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
     console.log(`🔍 收到查詢: ${query}`);
 
     // 處理查詢
-    const result = await processMedicalQueryReact(query.trim());
+    const result = await processMedicalQueryLangChain(query.trim());
 
     res.json({
       success: true,

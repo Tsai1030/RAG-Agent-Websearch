@@ -15,7 +15,10 @@
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
-    "openai": "^4.20.1"
+    "openai": "^4.20.1",
+    "langchain": "^0.1.16",
+    "@langchain/openai": "^0.0.21",
+    "@langchain/community": "^0.0.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
