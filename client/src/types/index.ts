@@ -34,4 +34,4 @@ export interface QueryHistory {
 export interface ErrorResponse {
   error: string;
   message: string;
-} 
+}

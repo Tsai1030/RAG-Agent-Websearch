@@ -29,6 +29,13 @@ class SerperSearchService {
   }
 }
 
+const SYSTEM_PROMPT = `你是一個醫療 ReAct agent，可使用以下工具：\n` +
+  `1. doctor_rag：查詢醫師資料庫\n` +
+  `2. vector_rag：向量檢索醫師資料\n` +
+  `3. web_search：Google 搜尋\n` +
+  `4. finish：輸出最終診斷報告。\n` +
+  `請依序輸出 Thought、Action、Action Input，獲得 Observation 後再繼續，直到使用 finish。回覆語言為繁體中文。`;
+
 // ReAct Agent 服務
 class ReactAgentService {
   constructor() {
@@ -50,18 +57,10 @@ class ReactAgentService {
     return optimizedQuery;
   }
 
-  async run(query) {
-    const systemPrompt = `你是一個醫療 ReAct agent，可使用以下工具：\n` +
-      `1. doctor_rag：查詢醫師資料庫\n` +
-      `2. vector_rag：向量檢索醫師資料\n` +
-      `3. web_search：Google 搜尋\n` +
-      `4. finish：輸出最終診斷報告。\n` +
-      `請依序輸出 Thought、Action、Action Input，獲得 Observation 後再繼續，直到使用 finish。回覆語言為繁體中文。`;
-
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: query }
-    ];
+  async run(messages) {
+    // 從現有訊息中取得最新的使用者問題
+    const userMessages = messages.filter(m => m.role === 'user' && !m.content.startsWith('Observation'));
+    const latestQuery = userMessages.length > 0 ? userMessages[userMessages.length - 1].content : '';
 
     for (let i = 0; i < 8; i++) {
       const completion = await this.openai.chat.completions.create({
@@ -91,13 +90,13 @@ class ReactAgentService {
 
       let observation = '';
       if (action === 'doctor_rag') {
-        const result = await this.doctorRag.searchDoctors(actionInput || query);
+        const result = await this.doctorRag.searchDoctors(actionInput || latestQuery);
         observation = JSON.stringify(result);
       } else if (action === 'vector_rag') {
-        const result = await this.vectorRag.searchDoctors(actionInput || query);
+        const result = await this.vectorRag.searchDoctors(actionInput || latestQuery);
         observation = JSON.stringify(result);
       } else if (action === 'web_search') {
-        const result = await this.searchService.search(this.optimizeSearchQuery(actionInput || query));
+        const result = await this.searchService.search(this.optimizeSearchQuery(actionInput || latestQuery));
         observation = JSON.stringify(result.organic ? result.organic.slice(0,3) : []);
       } else {
         observation = '未知行動';
@@ -110,10 +109,10 @@ class ReactAgentService {
   }
 }
 
-async function processMedicalQueryReact(query) {
+async function processMedicalQueryReact(messages) {
   const agent = new ReactAgentService();
-  const response = await agent.run(query);
+  const response = await agent.run(messages);
   return { response };
 }
 
-module.exports = { ReactAgentService, processMedicalQueryReact };
+module.exports = { ReactAgentService, processMedicalQueryReact, SYSTEM_PROMPT };

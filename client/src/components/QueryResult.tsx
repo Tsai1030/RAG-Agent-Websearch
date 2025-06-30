@@ -105,4 +105,4 @@ const QueryResult: React.FC<QueryResultProps> = ({ result }) => {
   );
 };
 
-export default QueryResult; 
+export default QueryResult;

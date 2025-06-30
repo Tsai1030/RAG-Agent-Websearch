@@ -37,9 +37,12 @@ apiClient.interceptors.response.use(
 );
 
 // 醫療資訊查詢 API
-export const queryMedicalInfo = async (query: string): Promise<QueryResponse> => {
+export const queryMedicalInfo = async (
+  conversationId: string,
+  message: string
+): Promise<QueryResponse> => {
   try {
-    const response = await apiClient.post<QueryResponse>('/query', { query });
+    const response = await apiClient.post<QueryResponse>('/query', { conversationId, message });
     return response.data;
   } catch (error: any) {
     if (error.response?.data) {
@@ -59,4 +62,4 @@ export const checkHealth = async (): Promise<{ status: string; timestamp: string
   }
 };
 
-export default apiClient; 
+export default apiClient;
