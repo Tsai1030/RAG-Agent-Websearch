@@ -13,7 +13,7 @@ model = SentenceTransformer('BAAI/bge-m3')
 # 指定一個父目錄來存放 ChromaDB 的所有資料
 client = chromadb.PersistentClient(path="chroma_db") 
 # 在這個父目錄下，建立或取得名為 "doctorv1" 的 collection
-collection = client.get_or_create_collection("doctorv4")
+collection = client.get_or_create_collection("doctorv5")
 # 4. 將每位醫師資料轉成向量並存入 ChromaDB
 for idx, doctor in enumerate(doctors):
     # 將醫師所有資訊合併成一個描述

@@ -3,9 +3,12 @@ from langchain.tools import Tool
 from langchain_openai import ChatOpenAI
 from langchain.agents import initialize_agent, AgentType
 import os
+# 讀取 .env
 
-# 設定 OpenAI API 金鑰
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+from dotenv import load_dotenv
+load_dotenv()
+# 確認 API Key 有讀取到
+print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY")[:20] + "..." if os.getenv("OPENAI_API_KEY") else "未設定")
 
 # 1. 查詢醫師專長的自定義函數
 def search_doctor_by_specialty(specialty: str) -> str:

@@ -24,29 +24,39 @@ function App() {
   const CHAT_WIDTH = 'max-w-[800px]';
 
   const handleQuery = async (query: string) => {
-    setPendingUserMsg(query);
+    // 先把 user 訊息 push 進 history
+    const userMsg = {
+      id: Date.now().toString(),
+      query,
+      response: '', // AI 回覆還沒來
+      timestamp: new Date().toISOString(),
+      status: 'loading' as QueryStatus,
+    };
+    setHistory(prev => [...prev, userMsg]);
     setPendingAI(true);
     setStatus('loading');
     setError('');
+    setPendingUserMsg(null); // 清空輸入框
+
     try {
-      const response = await queryMedicalInfo(query, history);
-      setHistory(prev => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          query,
-          response: response.response,
-          timestamp: response.timestamp,
-          status: 'success',
-        }
-      ]);
+      const response = await askAgent(query);
+      // 更新最後一筆 history，補上 AI 回覆
+      setHistory(prev => prev.map((item, idx) =>
+        idx === prev.length - 1
+          ? { ...item, response: response, timestamp: new Date().toISOString(), status: 'success' as QueryStatus }
+          : item
+      ));
       setStatus('success');
     } catch (err: any) {
       setError(err.message || '查詢失敗，請稍後再試');
       setStatus('error');
+      setHistory(prev => prev.map((item, idx) =>
+        idx === prev.length - 1
+          ? { ...item, response: '查詢失敗，請稍後再試', status: 'error' as QueryStatus }
+          : item
+      ));
     } finally {
       setPendingAI(false);
-      setPendingUserMsg(null);
     }
   };
 
@@ -65,14 +75,10 @@ function App() {
   }, [history, pendingAI]);
 
   // 只顯示 user query 與 AI 最終答案，不顯示 ReAct 推理過程
-  const chatMessages = [
-    ...history.map(item => [
-      { id: item.id + '-q', role: 'user', content: item.query },
-      { id: item.id + '-a', role: 'assistant', content: item.response || '' }
-    ]).flat(),
-    // 只在尚未送出時顯示暫存 user 訊息
-    ...(pendingUserMsg && history.length === 0 ? [{ id: 'pending-user', role: 'user', content: pendingUserMsg }] : [])
-  ];
+  const chatMessages = history.flatMap(item => [
+    { id: item.id + '-q', role: 'user', content: item.query },
+    ...(item.response ? [{ id: item.id + '-a', role: 'assistant', content: item.response }] : [])
+  ]);
 
   const MessageBubble = ({ message }: { message: any }) => {
     const isUser = message.role === 'user';
@@ -180,7 +186,7 @@ function App() {
                 {chatMessages.map((msg) => (
                   <MessageBubble key={msg.id} message={msg} />
                 ))}
-                {pendingAI && <TypingIndicator />}
+                {pendingAI && history.length > 0 && !history[history.length - 1].response && <TypingIndicator />}
               </div>
             </div>
             {/* 輸入框固定底部 */}
