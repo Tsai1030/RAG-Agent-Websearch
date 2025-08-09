@@ -50,4 +50,4 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({ error, onRetry }) => {
   );
 };
 
-export default ErrorMessage; 
+export default ErrorMessage;

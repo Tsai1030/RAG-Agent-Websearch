@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search, Send, Loader2 } from 'lucide-react';
 
 interface QueryFormProps {
-  onSubmit: (query: string) => void;
+  onSubmit: (message: string) => void;
   isLoading: boolean;
 }
 
@@ -92,5 +92,5 @@ const QueryForm: React.FC<QueryFormProps> = ({ onSubmit, isLoading }) => {
   );
 };
 
-export default QueryForm; 
- 
+export default QueryForm;
+

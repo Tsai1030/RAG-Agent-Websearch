@@ -1,39 +1,49 @@
 const express = require('express');
-const { processMedicalQueryReact } = require('../services/reactAgentService');
+const { processMedicalQueryReact, SYSTEM_PROMPT } = require('../services/reactAgentService');
+const conversationService = require('../services/conversationService');
 
 const router = express.Router();
 
 // 醫療資訊查詢端點
 router.post('/', async (req, res) => {
   try {
-    const { query } = req.body;
+    const { conversationId, message } = req.body;
 
     // 驗證輸入
-    if (!query || typeof query !== 'string' || query.trim().length === 0) {
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
       return res.status(400).json({
         error: '查詢內容不能為空',
         message: '請提供有效的查詢內容'
       });
     }
 
-    if (query.length > 500) {
+    if (message.length > 500) {
       return res.status(400).json({
         error: '查詢內容過長',
         message: '查詢內容不能超過 500 個字元'
       });
     }
 
-    console.log(`🔍 收到查詢: ${query}`);
+    console.log(`🔍 收到查詢: ${message}`);
 
-    // 處理查詢
-    const result = await processMedicalQueryReact(query.trim());
+    let messages = conversationService.getMessages(conversationId);
+    if (messages.length === 0) {
+      messages.push({ role: 'system', content: SYSTEM_PROMPT });
+    }
+    messages.push({ role: 'user', content: message.trim() });
+
+    const result = await processMedicalQueryReact(messages);
+
+    messages.push({ role: 'assistant', content: result.response });
+    conversationService.saveMessages(conversationId, messages);
 
     res.json({
       success: true,
-      query: query.trim(),
+      query: message.trim(),
       response: result.response,
       searchResults: result.searchResults,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      conversationId
     });
 
   } catch (error) {
@@ -70,4 +80,4 @@ router.get('/history', (req, res) => {
   });
 });
 
-module.exports = router; 
+module.exports = router;

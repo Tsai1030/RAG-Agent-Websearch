@@ -5,9 +5,11 @@ import QueryResult from './components/QueryResult';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorMessage from './components/ErrorMessage';
 import { queryMedicalInfo } from './services/api';
-import { QueryResponse, QueryStatus } from './types';
+import { QueryResponse, QueryStatus, QueryHistory } from './types';
 
 function App() {
+  const [conversationId] = useState<string>(() => crypto.randomUUID());
+  const [history, setHistory] = useState<QueryHistory[]>([]);
   const [status, setStatus] = useState<QueryStatus>('idle');
   const [result, setResult] = useState<QueryResponse | null>(null);
   const [error, setError] = useState<string>('');
@@ -19,9 +21,10 @@ function App() {
       setResult(null);
 
       console.log('🔍 開始查詢:', query);
-      const response = await queryMedicalInfo(query);
-      
+      const response = await queryMedicalInfo(conversationId, query);
+
       setResult(response);
+      setHistory((prev) => [...prev, { id: crypto.randomUUID(), query: response.query, response: response.response, timestamp: response.timestamp, status: 'success' }]);
       setStatus('success');
       console.log('✅ 查詢完成:', response);
     } catch (err: any) {
@@ -116,4 +119,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;
